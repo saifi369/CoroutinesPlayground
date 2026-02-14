@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     val state = viewModel.uiState.collectAsState()
                     PlaygroundScreen(
                         state = state.value,
-                        onStartTask = viewModel::performTask,
+                        onLoadData = viewModel::loadData,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PlaygroundScreen(
     state: MainScreenState,
-    onStartTask: () -> Unit,
+    onLoadData: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -79,10 +79,10 @@ fun PlaygroundScreen(
         Spacer(modifier = Modifier.height(24.dp))
         
         Button(
-            onClick = onStartTask,
+            onClick = onLoadData,
             enabled = state !is MainScreenState.Loading
         ) {
-            Text("Start Task")
+            Text("Load Data")
         }
     }
 }

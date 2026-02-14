@@ -20,7 +20,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow<MainScreenState>(MainScreenState.Idle)
     val uiState: StateFlow<MainScreenState> = _uiState
 
-    fun performTask() {
+    fun loadData() {
         _uiState.value = MainScreenState.Loading
         downloadJsonMainThread()
     }
