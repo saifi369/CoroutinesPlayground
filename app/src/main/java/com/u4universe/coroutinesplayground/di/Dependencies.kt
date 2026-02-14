@@ -2,18 +2,21 @@ package com.u4universe.coroutinesplayground.di
 
 import android.content.Context
 import androidx.room.Room
-import com.u4universe.coroutinesplayground.data.AppDatabase
-import com.u4universe.coroutinesplayground.network.RemoteService
+import com.u4universe.coroutinesplayground.data.local.AppDatabase
+import com.u4universe.coroutinesplayground.data.remote.RemoteService
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 object NetworkModule {
     private const val BASE_URL = "https://randomuser.me/"
 
-    val retrofit: Retrofit by lazy {
+    private val retrofit: Retrofit by lazy {
+        val networkJson = Json { ignoreUnknownKeys = true }
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(networkJson.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
