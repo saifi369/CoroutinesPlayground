@@ -14,7 +14,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -22,9 +21,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.u4universe.coroutinesplayground.ui.theme.CoroutinesPlaygroundTheme
-import com.u4universe.coroutinesplayground.viewmodel.ScreenState
 import com.u4universe.coroutinesplayground.viewmodel.MainViewModel
+import com.u4universe.coroutinesplayground.viewmodel.ScreenState
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             CoroutinesPlaygroundTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val state = viewModel.uiState.collectAsState()
+                    val state = viewModel.uiState.collectAsStateWithLifecycle()
                     PlaygroundScreen(
                         state = state.value,
                         onLoadData = viewModel::loadData,
@@ -93,10 +93,7 @@ fun PlaygroundScreen(
             }
         }
 
-        Button(
-            onClick = onLoadData,
-            enabled = state !is ScreenState.Loading
-        ) {
+        Button(onClick = onLoadData) {
             Text("Load Data")
         }
     }
