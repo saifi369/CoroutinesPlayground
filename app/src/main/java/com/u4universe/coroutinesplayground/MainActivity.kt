@@ -5,19 +5,17 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.u4universe.coroutinesplayground.databinding.ActivityMainBinding
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.getValue
-import kotlin.time.Duration.Companion.seconds
 
 private const val TAG = "MyTag"
-private val usersList = listOf("Ali", "Hamza", "Umair", "Usman")
 
 class MainActivity : AppCompatActivity() {
 
-//    val scope = CoroutineScope(Dispatchers.Main)
+    private val viewModel by viewModels<MainViewModel>()
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -33,21 +31,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnLoadData.setOnClickListener {
-            lifecycleScope.launch {
-                binding.tvData.text = "Loading..."
-                usersList.forEach {
-                    fetchDataForUser(it)
+            viewModel.loadData()
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userData.collect { data ->
+                    if (data == "Loading...") {
+                        binding.tvData.text = data
+                    } else if (data == "Complete") {
+                        binding.tvData.append("\n$data")
+                        moveToNextScreen()
+                    } else if (data.isNotEmpty()) {
+                        binding.tvData.append("\n$data ✅")
+                    }
                 }
-                binding.tvData.append("\nComplete")
-                moveToNextScreen()
             }
         }
-    }
-
-    suspend fun fetchDataForUser(userName: String) {
-        Log.d(TAG, "fetchDataForUser: loading data for :$userName")
-        delay(2.seconds)
-        binding.tvData.append("\n$userName ✅")
     }
 
     private fun moveToNextScreen() {
