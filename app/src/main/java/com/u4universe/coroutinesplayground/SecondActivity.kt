@@ -1,4 +1,4 @@
-package com.u4universe.androidbasics
+package com.u4universe.coroutinesplayground
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

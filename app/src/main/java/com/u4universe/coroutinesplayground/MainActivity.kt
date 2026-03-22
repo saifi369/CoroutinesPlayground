@@ -1,4 +1,4 @@
-package com.u4universe.androidbasics
+package com.u4universe.coroutinesplayground
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,9 +6,10 @@ import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.u4universe.androidbasics.databinding.ActivityMainBinding
+import com.u4universe.coroutinesplayground.databinding.ActivityMainBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.getValue
 import kotlin.time.Duration.Companion.seconds
 
 private const val TAG = "MyTag"
