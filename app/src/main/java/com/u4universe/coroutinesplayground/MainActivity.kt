@@ -1,111 +1,63 @@
-package com.u4universe.coroutinesplayground
+package com.u4universe.androidbasics
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.u4universe.coroutinesplayground.ui.theme.CoroutinesPlaygroundTheme
-import com.u4universe.coroutinesplayground.viewmodel.MainViewModel
-import com.u4universe.coroutinesplayground.viewmodel.ScreenState
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.u4universe.androidbasics.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
-class MainActivity : ComponentActivity() {
-    private val viewModel: MainViewModel by viewModels()
+private const val TAG = "MyTag"
+private val usersList = listOf("Ali", "Hamza", "Umair", "Usman")
+
+class MainActivity : AppCompatActivity() {
+
+//    val scope = CoroutineScope(Dispatchers.Main)
+
+    private val binding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            CoroutinesPlaygroundTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val state = viewModel.uiState.collectAsStateWithLifecycle()
-                    PlaygroundScreen(
-                        state = state.value,
-                        onLoadData = viewModel::loadData,
-                        modifier = Modifier.padding(innerPadding)
-                    )
+        setContentView(binding.root)
+
+        binding.btnNextScreen.setOnClickListener {
+            moveToNextScreen()
+        }
+
+        binding.btnLoadData.setOnClickListener {
+            lifecycleScope.launch {
+                binding.tvData.text = "Loading..."
+                usersList.forEach {
+                    fetchDataForUser(it)
                 }
+                binding.tvData.append("\nComplete")
+                moveToNextScreen()
             }
         }
     }
-}
 
-@Composable
-fun PlaygroundScreen(
-    state: ScreenState,
-    onLoadData: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)
-    ) {
-        when (state) {
-            is ScreenState.Loading -> {
-                CircularProgressIndicator()
-                Text(text = "Loading...")
-            }
+    suspend fun fetchDataForUser(userName: String) {
+        Log.d(TAG, "fetchDataForUser: loading data for :$userName")
+        delay(2.seconds)
+        binding.tvData.append("\n$userName ✅")
+    }
 
-            is ScreenState.Success -> {
-                Text(
-                    text = state.data,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            is ScreenState.Error -> {
-                Text(
-                    text = state.error,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            else -> {
-                Text(
-                    text = "Welcome to U4Universe",
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    lineHeight = 52.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        Button(onClick = onLoadData) {
-            Text("Load Data")
+    private fun moveToNextScreen() {
+        Intent(this, SecondActivity::class.java).also {
+            startActivity(it)
+            finish()
         }
     }
-}
 
-@Preview
-@Composable
-fun PlaygroundScreenPreview() {
-    CoroutinesPlaygroundTheme {
-        PlaygroundScreen(
-            state = ScreenState.Idle,
-            onLoadData = {},
-        )
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        scope.cancel()
+//    }
 }
