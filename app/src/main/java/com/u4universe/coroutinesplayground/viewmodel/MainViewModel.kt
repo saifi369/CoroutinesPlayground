@@ -4,54 +4,29 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.u4universe.coroutinesplayground.di.DatabaseModule
-import com.u4universe.coroutinesplayground.di.NetworkModule
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.seconds
+
+private const val TAG = "MyTag"
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val db = DatabaseModule.getDatabase(application)
-    private val remoteService = NetworkModule.remoteService
+    private val _counter = MutableStateFlow(0)
+    val counter = _counter.asStateFlow()
 
-    private val _uiState = MutableStateFlow<ScreenState>(ScreenState.Idle)
-    val uiState: StateFlow<ScreenState> = _uiState
-
-    fun loadData() {
-        viewModelScope.launch {
-            _uiState.value = ScreenState.Loading
-            val users = remoteService.getRandomUser().results
-
-            Log.d("MyTag", "loadData: Called on Thread: ${Thread.currentThread().name}")
-
-            if (users.isEmpty()) {
-                _uiState.value = ScreenState.Error("No data found")
-            } else {
-                _uiState.value = ScreenState.Success(users.first().toString())
-            }
-
-            while (true) {
-                Log.d("MyTag", "loadData: called")
-                delay(2.seconds)
-            }
-        }
-
-        viewModelScope.launch {
-            try {
-                Log.d("MyTag", "Coroutine 2 started")
-                delay(1.seconds)
-                throw RuntimeException("Error")
-            } catch (e: Exception) {
-                Log.d("MyTag", "Exception: ${e.message}")
-            }
-        }
+    fun testMainDispatcher() {
+        Log.d(TAG, "--- Dispatchers.Main ---")
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("MyTag", "onCleared: Called")
+    fun testMainImmediateDispatcher() {
+        Log.d(TAG, "--- Dispatchers.Main.immediate ---")
+    }
+
+    fun incrementCounter() {
+        _counter.update { it + 1 }
+        Log.d(TAG, "incrementCounter: New value: ${_counter.value}")
     }
 }

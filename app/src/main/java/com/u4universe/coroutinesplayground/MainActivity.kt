@@ -1,6 +1,7 @@
 package com.u4universe.coroutinesplayground
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,21 +11,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.u4universe.coroutinesplayground.ui.theme.CoroutinesPlaygroundTheme
 import com.u4universe.coroutinesplayground.viewmodel.MainViewModel
-import com.u4universe.coroutinesplayground.viewmodel.ScreenState
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
@@ -35,10 +33,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             CoroutinesPlaygroundTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val state = viewModel.uiState.collectAsStateWithLifecycle()
                     PlaygroundScreen(
-                        state = state.value,
-                        onLoadData = viewModel::loadData,
+                        viewModel = viewModel,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -47,10 +43,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private const val TAG = "MyTag"
+
 @Composable
 fun PlaygroundScreen(
-    state: ScreenState,
-    onLoadData: () -> Unit,
+    viewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -58,54 +55,32 @@ fun PlaygroundScreen(
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        when (state) {
-            is ScreenState.Loading -> {
-                CircularProgressIndicator()
-                Text(text = "Loading...")
-            }
-
-            is ScreenState.Success -> {
-                Text(
-                    text = state.data,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            is ScreenState.Error -> {
-                Text(
-                    text = state.error,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            else -> {
-                Text(
-                    text = "Welcome to U4Universe",
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    lineHeight = 52.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        Button(onClick = onLoadData) {
-            Text("Load Data")
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PlaygroundScreenPreview() {
-    CoroutinesPlaygroundTheme {
-        PlaygroundScreen(
-            state = ScreenState.Idle,
-            onLoadData = {},
+        Text(
+            text = "Dispatchers Sandbox",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 32.dp)
         )
+
+        Button(onClick = viewModel::testMainDispatcher) {
+            Text("Test Dispatchers.Main")
+        }
+
+        Button(onClick = viewModel::testMainImmediateDispatcher) {
+            Text("Test Dispatchers.Main.immediate")
+        }
+
+        val counter by viewModel.counter.collectAsStateWithLifecycle()
+
+        Button(
+            onClick = {
+                viewModel.incrementCounter()
+                Log.d(TAG, "PlaygroundScreen: Counter: $counter")
+            }
+        ) {
+            Text("Counter: $counter")
+        }
     }
 }
