@@ -1,114 +1,82 @@
+@file:SuppressLint("SetTextI18n")
+
 package com.u4universe.coroutinesplayground
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.util.Log
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.u4universe.coroutinesplayground.ui.theme.CoroutinesPlaygroundTheme
-import com.u4universe.coroutinesplayground.viewmodel.ScreenState
-import com.u4universe.coroutinesplayground.viewmodel.MainViewModel
+import androidx.appcompat.app.AppCompatActivity
+import com.u4universe.coroutinesplayground.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
 
-class MainActivity : ComponentActivity() {
-    private val viewModel: MainViewModel by viewModels()
+private const val TAG = "MyTag"
+
+class MainActivity : AppCompatActivity() {
+
+    private val viewModel by viewModels<MainViewModel>()
+    private val binding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            CoroutinesPlaygroundTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val state = viewModel.uiState.collectAsState()
-                    PlaygroundScreen(
-                        state = state.value,
-                        onLoadData = viewModel::loadData,
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+        setContentView(binding.root)
+
+        binding.btnNextScreen.setOnClickListener {
+            moveToNextScreen()
+        }
+
+        binding.btnComposeScreen.setOnClickListener {
+            startActivity(Intent(this, MainComposeActivity::class.java))
+        }
+
+        binding.btnLoadData.setOnClickListener {
+            viewModel.loadData()
         }
     }
-}
 
-@Composable
-fun PlaygroundScreen(
-    state: ScreenState,
-    onLoadData: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)
-    ) {
-        when (state) {
-            is ScreenState.Loading -> {
-                CircularProgressIndicator()
-                Text(text = "Loading...")
+    private suspend fun processState(uiState: UiState) {
+        when (uiState) {
+            UiState.Complete -> {
+                binding.tvData.append("\nComplete")
+                showCompletionAnimation()
+                delay(500)
+                moveToNextScreen()
             }
 
-            is ScreenState.Success -> {
-                Text(
-                    text = state.data,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                )
+            is UiState.Success -> {
+                Log.d(TAG, "processState: data loaded for :${uiState.data} :✅")
+                binding.tvData.append("\n${uiState.data} ✅")
             }
 
-            is ScreenState.Error -> {
-                Text(
-                    text = state.error,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            else -> {
-                Text(
-                    text = "Welcome to U4Universe",
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    lineHeight = 52.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        Button(
-            onClick = onLoadData,
-            enabled = state !is ScreenState.Loading
-        ) {
-            Text("Load Data")
+            UiState.Loading -> binding.tvData.text = "Loading..."
         }
     }
-}
 
-@Preview
-@Composable
-fun PlaygroundScreenPreview() {
-    CoroutinesPlaygroundTheme {
-        PlaygroundScreen(
-            state = ScreenState.Idle,
-            onLoadData = {},
-        )
+    private fun showCompletionAnimation() {
+        binding.tvCompletionAnimation.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
+            scaleX = 0.5f
+            scaleY = 0.5f
+            animate()
+                .alpha(1f)
+                .scaleX(1.2f)
+                .scaleY(1.2f)
+                .setDuration(500)
+                .start()
+        }
+    }
+
+    private fun moveToNextScreen() {
+        Intent(this, SecondActivity::class.java).also {
+            startActivity(it)
+            finish()
+        }
     }
 }
