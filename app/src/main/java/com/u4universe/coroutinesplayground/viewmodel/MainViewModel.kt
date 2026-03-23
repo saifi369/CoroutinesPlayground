@@ -27,6 +27,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun incrementCounter() {
         _counter.update { it + 1 }
-        Log.d(TAG, "incrementCounter: New value: ${_counter.value}")
     }
 }

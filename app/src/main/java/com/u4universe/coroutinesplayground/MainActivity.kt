@@ -1,7 +1,6 @@
 package com.u4universe.coroutinesplayground
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,6 +23,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.u4universe.coroutinesplayground.ui.theme.CoroutinesPlaygroundTheme
 import com.u4universe.coroutinesplayground.viewmodel.MainViewModel
 
+private const val TAG = "MyTag"
+
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
 
@@ -43,8 +44,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private const val TAG = "MyTag"
-
 @Composable
 fun PlaygroundScreen(
     viewModel: MainViewModel,
@@ -55,7 +54,7 @@ fun PlaygroundScreen(
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp, alignment = Alignment.CenterVertically)
     ) {
         Text(
             text = "Dispatchers Sandbox",
@@ -77,7 +76,6 @@ fun PlaygroundScreen(
         Button(
             onClick = {
                 viewModel.incrementCounter()
-                Log.d(TAG, "PlaygroundScreen: Counter: $counter")
             }
         ) {
             Text("Counter: $counter")
