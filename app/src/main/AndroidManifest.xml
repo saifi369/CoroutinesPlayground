@@ -21,6 +21,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".LocationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CoroutinesPlayground" />
+        <activity
+            android:name=".SecondActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CoroutinesPlayground" />
     </application>
 
 </manifest>

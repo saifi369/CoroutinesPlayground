@@ -1,21 +1,42 @@
 package com.u4universe.coroutinesplayground.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import com.u4universe.coroutinesplayground.di.DatabaseModule
-import com.u4universe.coroutinesplayground.di.NetworkModule
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+private const val TAG = "MyTag"
+private val usersList = listOf("Ali", "Hamza", "Umair", "Usman")
 
-    private val db = DatabaseModule.getDatabase(application)
-    private val service = NetworkModule.remoteService
+class MainViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ScreenState>(ScreenState.Idle)
-    val uiState: StateFlow<ScreenState> = _uiState
+    private val _userData = MutableStateFlow<ScreenState>(ScreenState.Idle)
+    val userData = _userData.asStateFlow()
 
     fun loadData() {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            _userData.value = ScreenState.Loading
+            usersList.forEach {
+                fetchDataForUser(it)
+            }
+            _userData.value = ScreenState.Complete
+        }
     }
+
+    private suspend fun fetchDataForUser(userName: String) {
+        Log.d(TAG, "fetchDataForUser: loading data for :$userName")
+        delay(1.seconds)
+        _userData.value = ScreenState.Success(userName)
+    }
+}
+
+sealed interface ScreenState {
+    object Idle : ScreenState
+    object Loading : ScreenState
+    data class Success(val data: String) : ScreenState
+    object Complete : ScreenState
 }
