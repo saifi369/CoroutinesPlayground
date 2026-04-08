@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
             CoroutinesPlaygroundTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val state = viewModel.uiState.collectAsStateWithLifecycle()
-                    PlaygroundScreen(
+                    AppScreen(
                         state = state.value,
                         onLoadData = viewModel::loadData,
                         modifier = Modifier.padding(innerPadding)
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PlaygroundScreen(
+fun AppScreen(
     state: ScreenState,
     onLoadData: () -> Unit,
     modifier: Modifier = Modifier
@@ -82,7 +82,7 @@ fun PlaygroundScreen(
                 )
             }
 
-            else -> {
+            is ScreenState.Idle -> {
                 Text(
                     text = "Welcome to U4Universe",
                     fontSize = 44.sp,
@@ -101,9 +101,9 @@ fun PlaygroundScreen(
 
 @Preview
 @Composable
-fun PlaygroundScreenPreview() {
+fun AppScreenPreview() {
     CoroutinesPlaygroundTheme {
-        PlaygroundScreen(
+        AppScreen(
             state = ScreenState.Idle,
             onLoadData = {},
         )

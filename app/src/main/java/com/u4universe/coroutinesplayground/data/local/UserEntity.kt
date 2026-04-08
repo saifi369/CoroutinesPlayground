@@ -8,6 +8,14 @@ data class UserEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val name: String,
+    val email: String
 ) {
-    override fun toString() = "👤$name"
+    override fun toString(): String {
+        return """
+            |👤${name}
+            |
+            |📧$email
+        """.trimMargin()
+
+    }
 }
