@@ -3,14 +3,15 @@ package com.u4universe.coroutinesplayground.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-private const val TAG = "MyTag"
+private const val TAG = "LiveLocationViewModel"
 
 class LiveLocationViewModel : ViewModel() {
 
-    val gpsLocationFlow: Flow<String> = flow {
+    // ⚠️ Bug: cold flow with no lifecycle awareness
+    // Keeps polling GPS even when the app is in the background
+    val gpsLocationFlow = flow<String> {
         var lat = 12.3456
         var lng = -123.4567
         while (true) {

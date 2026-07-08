@@ -1,6 +1,5 @@
 package com.u4universe.coroutinesplayground
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -31,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnLocationScreen.setOnClickListener {
-            startActivity(Intent(this@MainActivity, LocationActivity::class.java))
+            startActivity(Intent(this, LocationActivity::class.java))
         }
 
         lifecycleScope.launch {
@@ -41,23 +40,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    suspend fun handleState(state: ScreenState) {
+    private fun handleState(state: ScreenState) {
         when (state) {
-            Idle -> {
-                binding.tvData.text = "Welcome to U4Universe"
-            }
+            Idle -> binding.tvData.text = "Welcome!"
+
+            ScreenState.Loading -> binding.tvData.text = "Loading..."
+
+            is Success -> binding.tvData.append("\n${state.data} ✅")
 
             Complete -> {
-                showAnimationAndNavigate()
-            }
-
-            is Success -> {
-                binding.tvData.append("\n${state.data} ✅")
-            }
-
-            ScreenState.Loading -> {
-                binding.tvData.text = "Loading..."
+                lifecycleScope.launch { showAnimationAndNavigate() }
             }
         }
     }
@@ -66,14 +58,8 @@ class MainActivity : AppCompatActivity() {
         binding.ivSuccess.apply {
             alpha = 0f
             visibility = View.VISIBLE
-
-            animate()
-                .alpha(1f)
-                .setDuration(1000)
-                .start()
+            animate().alpha(1f).setDuration(1000).start()
         }
-
-        //wait for animation to complete
         delay(1000)
         startActivity(Intent(this@MainActivity, SecondActivity::class.java))
         finish()

@@ -34,10 +34,12 @@ class LocationActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // ⚠️ Bug: collectAsState has no lifecycle awareness
+                    // The GPS flow keeps emitting even when the app is in the background
                     val locationState by viewModel.gpsLocationFlow.collectAsState(
                         initial = "Searching for location..."
                     )
-                    MainScreen(location = locationState)
+                    LocationScreen(location = locationState)
                 }
             }
         }
@@ -45,7 +47,7 @@ class LocationActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(location: String) {
+fun LocationScreen(location: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()

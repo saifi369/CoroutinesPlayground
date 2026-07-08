@@ -1,10 +1,10 @@
 package com.u4universe.coroutinesplayground
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.u4universe.coroutinesplayground.databinding.ActivitySecondBinding
 
-class SecondActivity : ComponentActivity() {
+class SecondActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySecondBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
